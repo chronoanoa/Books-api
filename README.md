@@ -1,17 +1,13 @@
+# 📚 Books API
+
 <p align="center">
-  <h1 align="center">📚 Books API</h1>
-  <p align="center">Библиотека книг на Flask — быстро, минималистично, без магии.</p>
-  <p align="center">
-    <img src="https://img.shields.io/badge/python-3.11-3776AB?style=flat-square&logo=python&logoColor=white" />
-    <img src="https://img.shields.io/badge/flask-3.1-000000?style=flat-square&logo=flask&logoColor=white" />
-    <img src="https://img.shields.io/badge/tests-passing-2ea043?style=flat-square" />
-    <img src="https://img.shields.io/badge/license-MIT-lightgrey?style=flat-square" />
-  </p>
+  <img src="https://img.shields.io/badge/python-3.11-3776AB?style=flat-square&logo=python&logoColor=white" />
+  <img src="https://img.shields.io/badge/flask-3.1-000000?style=flat-square&logo=flask&logoColor=white" />
+  <img src="https://img.shields.io/badge/pytest-8-0A6EBD?style=flat-square&logo=pytest&logoColor=white" />
+  <img src="https://img.shields.io/badge/license-MIT-lightgrey?style=flat-square" />
 </p>
 
----
-
-> RESTful API для библиотеки книг. Хранит данные в памяти, полностью покрыт тестами и открывается одной командой.
+REST API для библиотеки книг на Flask. Проект поддерживает CRUD, частичное обновление через PATCH, поиск по названию и покрыт автотестами с использованием Flask test client.
 
 ---
 
@@ -20,28 +16,31 @@
 | Возможность | Описание |
 |---|---|
 | 🔄 CRUD | Создание, чтение, обновление и удаление книг |
-| 🩹 `PATCH` | Частичное обновление любого поля |
+| 🩹 PATCH | Частичное обновление любого поля |
 | 🔍 Поиск | `?title=мастер` — без учёта регистра |
 | 🧪 Тесты | `pytest` + Flask `test_client` |
-| 🧰 Postman | Готовая коллекция с переменными и проверками |
+| 🧰 Postman | Готовая коллекция для ручного тестирования |
 
 ---
 
-## 🗂 Структура
+## 🗂 Структура проекта
 
 ```text
-books-api/
+Books-api/
 ├── app/
 │   ├── __init__.py          # фабрика приложения и регистрация Blueprint
-│   ├── data.py              # хранилище книг в памяти
-│   └── routes.py            # эндпоинты + общая валидация
+│   ├── data.py              # хранилище книг в памяти + ID counter
+│   └── routes.py            # эндпоинты и валидация
 ├── postman/
 │   └── books_collection.json
 ├── tests/
 │   ├── conftest.py
 │   └── test_books.py
+├── .gitignore
 ├── requirements.txt
-└── run.py
+├── README.md
+├── run.py
+└── venv/                   # при локальном создании окружения
 ```
 
 ---
@@ -49,32 +48,27 @@ books-api/
 ## 🚀 Быстрый старт
 
 ```bash
-# 1 — клонируй и зайди в папку
-git clone <repo-url> && cd books-api
-
-# 2 — окружение
+cd "C:\Users\dodia\OneDrive\Рабочий стол\Flask\Books-api"
 python -m venv venv
-venv\Scripts\activate        # Windows
-# source venv/bin/activate   # macOS / Linux
-
-# 3 — зависимости
+venv\Scripts\activate         # Windows
+# source venv/bin/activate    # macOS / Linux
 pip install -r requirements.txt
-
-# 4 — поехали
 python run.py
 ```
 
-Сервер поднимется на [`http://127.0.0.1:5000`](http://127.0.0.1:5000).
+После запуска API будет доступно по адресу `http://127.0.0.1:5000`.
 
 ---
 
 ## 🧪 Тесты
 
 ```bash
-pytest          # 16 тестов, < 1 cек
-pytest -v       # с названиями
+pytest
+pytest -v
 pytest --tb=short
 ```
+
+В проекте предусмотрены проверки для: получения всех книг, поиска, создания, обновления, частичного обновления, удаления и ошибок валидации.
 
 ---
 
@@ -83,17 +77,17 @@ pytest --tb=short
 | Метод | Путь | Что делает |
 |---|---|---|
 | `GET` | `/` | Главная страница |
-| `GET` | `/books` | Все книги `{ count, books }` |
-| `GET` | `/books/<id>` | Одна книга по id |
-| `GET` | `/books/search?title=...` | Поиск по названию |
+| `GET` | `/books` | Все книги в формате `{ count, books }` |
+| `GET` | `/books/<int:book_id>` | Одна книга по `id` |
+| `GET` | `/books/search?title=...` | Поиск по названию без учёта регистра |
 | `POST` | `/books` | Создать книгу |
-| `PUT` | `/books/<id>` | Полное обновление |
-| `PATCH` | `/books/<id>` | Частичное обновление |
-| `DELETE` | `/books/<id>` | Удалить книгу |
+| `PUT` | `/books/<int:book_id>` | Полное обновление |
+| `PATCH` | `/books/<int:book_id>` | Частичное обновление |
+| `DELETE` | `/books/<int:book_id>` | Удалить книгу |
 
 ---
 
-## 📦 Модель
+## 📦 Модель данных
 
 ```json
 {
@@ -109,17 +103,16 @@ pytest --tb=short
 |---|---|---|
 | `title` | `string` | непустая строка |
 | `author` | `string` | непустая строка |
-| `year` | `int` | `>= 0`, `true`/`false` не принимаются |
+| `year` | `int` | целое число `>= 0`, не допускается `bool` |
 | `is_available` | `boolean` | `true` или `false` |
 
-Ошибки отдают `{"error": "..."}` с кодами `400` / `404`. Пробелы у строк отрезаются.
+При ошибках API возвращает JSON вида `{"error": "..."}` с кодами `400` / `404`. Пробелы вокруг строк автоматически обрезаются.
 
 ---
 
-## 💡 Примеры
+## 💡 Примеры запросов
 
-<details>
-<summary><code>GET /books</code></summary>
+### GET /books
 
 ```bash
 curl http://127.0.0.1:5000/books
@@ -135,10 +128,7 @@ curl http://127.0.0.1:5000/books
 }
 ```
 
-</details>
-
-<details>
-<summary><code>POST /books</code></summary>
+### POST /books
 
 ```bash
 curl -X POST http://127.0.0.1:5000/books \
@@ -153,10 +143,7 @@ curl -X POST http://127.0.0.1:5000/books \
 }
 ```
 
-</details>
-
-<details>
-<summary><code>PATCH /books/1</code></summary>
+### PATCH /books/1
 
 ```bash
 curl -X PATCH http://127.0.0.1:5000/books/1 \
@@ -171,35 +158,46 @@ curl -X PATCH http://127.0.0.1:5000/books/1 \
 }
 ```
 
-</details>
-
-<details>
-<summary><code>GET /books/search?title=мастер</code></summary>
+### GET /books/search?title=мастер
 
 ```bash
 curl "http://127.0.0.1:5000/books/search?title=мастер"
 ```
 
 ```json
-{ "count": 1, "books": [{ "id": 1, "title": "Мастер и Маргарита", "author": "Михаил Булгаков", "year": 1967, "is_available": true }] }
+{
+  "count": 1,
+  "books": [
+    { "id": 1, "title": "Мастер и Маргарита", "author": "Михаил Булгаков", "year": 1967, "is_available": true }
+  ]
+}
 ```
-
-</details>
 
 ---
 
 ## 🧭 Postman
 
-1. Импортируй `postman/books_collection.json`.
-2. Запусти сервер (`python run.py`).
-3. Жми **Send** — в коллекции уже настроены переменные `base_url` и `book_id`, созданы проверки на статусы и сохранение `id` после `POST`.
+1. Импортируйте файл `postman/books_collection.json`.
+2. Запустите сервер командой `python run.py`.
+3. Нажмите **Send** — в коллекции уже настроены переменные и базовые проверки статусов.
+
+> В проекте есть отдельный набор тестов для Flask, а коллекция Postman служит удобным способом ручной проверки эндпоинтов.
 
 ---
 
-## 🛠 Стек
+## 🛠 Технические особенности
 
-Python 3.11 · Flask 3.1 · Werkzeug · pytest 8
+- Приложение построено на паттерне Flask application factory и Blueprint.
+- Данные хранятся в памяти, поэтому после перезапуска сервера список книг сбрасывается.
+- Для валидации используются проверки типов, непустых строк, допустимых значений `year` и `is_available`.
+- В `run.py` включён режим отладки (`debug=True`), что удобно для разработки, но для продакшена стоит отключить.
+- Postman-коллекция в проекте является рабочим шаблоном для проверки API локально.
 
 ---
+
+## ✅ Итог
+
+Проект представляет собой компактный и понятный REST API для управления библиотекой книг. Он легко запускается, хорошо покрыт тестами и подходит как основа для дальнейшего расширения функциональности.
 
 <p align="center"><sub>Сделано для людей, которые любят, когда код прост, а книги доступны.</sub></p>
+
