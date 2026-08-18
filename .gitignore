@@ -1,0 +1,9 @@
+# Virtual Environment & Cache
+exam/
+venv/
+.venv/
+__pycache__/
+*.pyc
+
+# VS Code settings
+.vscode/
