@@ -48,7 +48,7 @@ Books-api/
 ## 🚀 Быстрый старт
 
 ```bash
-cd "C:\Users\dodia\OneDrive\Рабочий стол\Flask\Books-api"
+cd books-api
 python -m venv venv
 venv\Scripts\activate         # Windows
 # source venv/bin/activate    # macOS / Linux
