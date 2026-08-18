@@ -1,9 +1,6 @@
-# Virtual Environment & Cache
-exam/
-venv/
-.venv/
 __pycache__/
 *.pyc
-
-# VS Code settings
+.pytest_cache/
+venv/
+.venv/
 .vscode/
